@@ -197,8 +197,8 @@ defmodule Ecto.Repo.Backend do
       end
 
       valid = field == primary_key or
-              value_type == nil or
-              Util.type_eq?(value_type, type)
+              value_type == :any or
+              Util.type_castable_to?(value_type, type)
 
       # TODO: Check if model field allows nil
       unless valid do

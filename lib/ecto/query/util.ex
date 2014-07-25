@@ -147,6 +147,13 @@ defmodule Ecto.Query.Util do
     end
   end
 
+  def value_to_type([value|_], fun) do
+    case value_to_type(value, fun) do
+      {:ok, type} -> {:ok, {:array, type}}
+      {:error, _} = err -> err
+    end
+  end
+
   def value_to_type(value, nil), do: {:error, "`unknown type of value `#{inspect value}`"}
 
   def value_to_type(expr, fun), do: fun.(expr)
@@ -181,7 +188,6 @@ defmodule Ecto.Query.Util do
   def type_castable_to?(t, t), do: true
   def type_castable_to?(:binary, :string), do: true
   def type_castable_to?(:string, :binary), do: true
-  def type_castable_to?(t, {:array, t}), do: true
   def type_castable_to?({:array, a}, {:array, b}), do: type_castable_to?(a, b)
   def type_castable_to?(_, :any), do: true # TOOD: Can :any be casted to anything else?
   def type_castable_to?(a, b), do: false
