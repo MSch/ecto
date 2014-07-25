@@ -133,7 +133,7 @@ defmodule Ecto.Query.Util do
 
     res = Enum.find_value(elem_types, fn
       {:ok, elem_type} ->
-        unless type_eq?(inner, elem_type) do
+        unless type_castable_to?(inner, elem_type) do
           {:error, "all elements in array have to be of same type"}
         end
       {:error, _} = err ->
@@ -178,9 +178,13 @@ defmodule Ecto.Query.Util do
 
   # Returns true if another type can be casted to the given type
   @doc false
-  def type_castable_to?(:binary), do: true
-  def type_castable_to?({:array, _}), do: true
-  def type_castable_to?(_), do: false
+  def type_castable_to?(t, t), do: true
+  def type_castable_to?(:binary, :string), do: true
+  def type_castable_to?(:string, :binary), do: true
+  def type_castable_to?(t, {:array, t}), do: true
+  def type_castable_to?({:array, a}, {:array, b}), do: type_castable_to?(a, b)
+  def type_castable_to?(_, :any), do: true # TOOD: Can :any be casted to anything else?
+  def type_castable_to?(a, b), do: false
 
   # Tries to cast the given value to the specified type.
   # If value cannot be casted just return it.
